@@ -55,7 +55,34 @@ class TerminalView: NSView {
         historyIndex = commandHistory.count
         inputField.stringValue = ""
         
-        // Send to Tabnine via stdin - this would connect to the process
+        // Handle built-in commands
+        if command.hasPrefix("/cd ") {
+            let path = String(command.dropFirst(4)).trimmingCharacters(in: .whitespacesAndNewlines)
+            if FileManager.default.changeCurrentDirectoryPath(path) {
+                writeOutput("Changed directory to: \(path)\n")
+            } else {
+                writeOutput("Error: Directory not found: \(path)\n")
+            }
+            return
+        }
+        
+        if command == "/projects" {
+            // Would show project picker - for now just acknowledge
+            writeOutput("Use /cd <path> to change project directory\n")
+            return
+        }
+        
+        if command == "/detect" {
+            if let appDelegate = NSApplication.shared.delegate as? AppDelegate,
+               let project = appDelegate.detectCurrentProject() {
+                writeOutput("Detected project: \(project)\n")
+            } else {
+                writeOutput("No project detected from VSCode or Xcode.\n")
+            }
+            return
+        }
+        
+        // Send to Tabnine via stdin
         NotificationCenter.default.post(name: .tabnineCommand, object: command)
     }
     
