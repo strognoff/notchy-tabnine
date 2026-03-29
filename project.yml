@@ -1,0 +1,37 @@
+name: NotchyTabnine
+options:
+  bundleIdPrefix: com.notchytabnine
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "15.0"
+
+settings:
+  base:
+    PRODUCT_NAME: NotchyTabnine
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.9"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_HARDENED_RUNTIME: YES
+
+targets:
+  NotchyTabnine:
+    type: application
+    platform: macOS
+    sources:
+      - path: NotchyTabnine/Sources
+        type: group
+    resources:
+      - path: NotchyTabnine/Resources
+        type: group
+    settings:
+      base:
+        INFOPLIST_FILE: NotchyTabnine/Resources/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.notchytabnine.app
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+        COMBINE_HIDPI_IMAGES: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_ENTITLEMENTS: NotchyTabnine/Resources/NotchyTabnine.entitlements
+    entitlements:
+      path: NotchyTabnine/Resources/NotchyTabnine.entitlements
