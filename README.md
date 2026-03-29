@@ -10,10 +10,11 @@ A macOS menu bar app that puts Tabnine CLI agent right in your MacBook's notch. 
 
 - **Menu Bar App** — Click the terminal icon to open floating panel
 - **Tabnine CLI Agent** — Run Tabnine agent sessions directly in the app
+- **Auto Project Detection** — Automatically detects your open project from VSCode, VSCode Insiders, or Xcode
 - **Notch Integration** — Hover over MacBook Pro notch to reveal panel (macOS 14+)
 - **Multi-Session Tabs** — Run multiple Tabnine sessions side by side
 - **Git Checkpoints** — Cmd+S to snapshot before Tabnine makes changes
-- **Project Detection** — Auto-discovers and cds into project directories
+- **Project Commands** — Built-in commands to navigate and detect projects
 
 ## Requirements
 
@@ -60,20 +61,34 @@ open NotchyTabnine.xcodeproj
 ### First Launch
 
 1. Click the terminal icon in the menu bar
-2. A floating panel appears with Tabnine agent
-3. Type `/help` to see available commands
-4. Start coding!
+2. NotchyTabnine auto-detects your open project from VSCode or Xcode
+3. A floating panel appears with Tabnine agent ready in your project directory
+4. Type `/help` to see available commands
+5. Start coding!
+
+### Project Auto-Detection
+
+NotchyTabnine automatically detects your current project from:
+
+1. **VSCode** — Reads from `~/Library/Application Support/Code/User/workspaceStorage/`
+2. **VSCode Insiders** — Reads from `~/Library/Application Support/Code - Insiders/User/workspaceStorage/`
+3. **Xcode** — Detects frontmost `.xcodeproj` or `.xcworkspace`
+
+Priority order: VSCode → VSCode Insiders → Xcode (first one found wins)
 
 ### Commands
 
 - `/help` — Show all available commands
 - `/ask <question>` — Ask Tabnine anything about your code
+- `/cd <path>` — Change project directory
+- `/detect` — Re-detect current project from VSCode/Xcode
+- `/projects` — List recent projects
 - `/test` — Run tests in current directory
-- `/config` — Open Tabnine settings
 - `exit` — Close the session
 
 ### Keyboard Shortcuts
 
+- `↑/↓` — Command history navigation
 - `Cmd+T` — New Tabnine tab
 - `Cmd+W` — Close current tab
 - `Cmd+S` — Git checkpoint (save snapshot)
@@ -85,12 +100,27 @@ open NotchyTabnine.xcodeproj
 NotchyTabnine/
 ├── Sources/
 │   ├── main.swift              # App entry point
-│   ├── AppDelegate.swift       # Menu bar & panel management
+│   ├── AppDelegate.swift       # Menu bar, panel & project detection
 │   └── TerminalView.swift      # Terminal UI component
 ├── Resources/
 │   ├── Info.plist              # App configuration
 │   └── NotchyTabnine.entitlements
 └── project.yml                 # XcodeGen configuration
+```
+
+### Project Detection Flow
+
+```
+togglePanel()
+    ↓
+detectCurrentProject()
+    ├── detectVSCodeProject()       → workspaceStorage/window.json
+    ├── detectVSCodeInsidersProject()
+    └── detectXcodeProject()       → runningApplications recentDocuments
+    ↓
+startTabnineSession(projectPath)
+    ↓
+Tabnine agent runs in project directory
 ```
 
 ## Dependencies
@@ -105,6 +135,11 @@ Make sure Tabnine CLI is installed:
 ```bash
 which tabnine
 ```
+
+### Project not detected
+- Make sure VSCode, VSCode Insiders, or Xcode is open with a folder/workspace
+- Try `/detect` command to re-scan
+- Use `/cd <path>` to manually set the project directory
 
 ### Notch not working
 - Requires macOS 14.0+ and MacBook Pro with notch
